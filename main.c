@@ -8,6 +8,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+LLVMValueRef llvmGenLocalStringVar(LLVMModuleRef mod, const char* data, int len) {
+  LLVMValueRef glob = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), len), "string");
+
+  LLVMSetLinkage(glob, LLVMInternalLinkage);
+  LLVMSetGlobalConstant(glob, 1);
+  LLVMSetInitializer(glob, LLVMConstString(data, len, 1));
+
+  return glob;
+}
+
 int main(int argc, char const *argv[]) {
   LLVMModuleRef mod = LLVMModuleCreateWithName("my_module");
 
@@ -49,6 +59,8 @@ int main(int argc, char const *argv[]) {
   LLVMSetInitializer(GlobalVar, LLVMConstString("nyan", 6, 1));
   uint64_t raw = LLVMGetGlobalValueAddress(engine, "simple_value");
   printf("%s\n", raw);
+
+  llvmGenLocalStringVar(mod, "abc", 3);
 
   LLVMDumpModule(mod);
 
