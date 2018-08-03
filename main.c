@@ -25,6 +25,11 @@ int main(int argc, char const *argv[]) {
   LLVMTypeRef ret_type = LLVMFunctionType(LLVMInt32Type(), param_types, 2, 0);
   LLVMValueRef sum = LLVMAddFunction(mod, "sum", ret_type);
 
+  // what is an address space?
+  LLVMTypeRef nyans[] = { LLVMPointerType(LLVMInt8Type(), 0) };
+  LLVMTypeRef rettype = LLVMFunctionType(LLVMInt32Type(), nyans, 1, 0);
+  LLVMAddFunction(mod, "puts", rettype);
+
   LLVMBasicBlockRef entry = LLVMAppendBasicBlock(sum, "entry");
 
   LLVMContextRef context = LLVMGetGlobalContext();
