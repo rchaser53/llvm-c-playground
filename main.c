@@ -34,8 +34,14 @@ int main(int argc, char const *argv[]) {
   LLVMTypeRef te = LLVMInt32Type();
   LLVMValueRef val = LLVMBuildAlloca(builder, te, "uei");
   LLVMBuildStore(builder, LLVMConstInt(te, 31, 0), val);
-  // LLVMBuildLoad(builder, val, "uei");
   LLVMValueRef tmp = LLVMBuildAdd(builder, LLVMGetParam(sum, 0), LLVMBuildLoad(builder, val, "uei"), "tmp");
+
+  LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 6), "simple_value");
+  LLVMValueRef TempStr = LLVMConstString("nyan", 6, 1);
+  LLVMSetInitializer(GlobalVar, TempStr);
+  LLVMValueRef aa = LLVMBuildInBoundsGEP(builder, GlobalVar, &TempStr, 1, "simple_value");
+  LLVMBuildLoad(builder, aa, "as");
+
   LLVMBuildRet(builder, tmp);
 
   char *error = NULL;
