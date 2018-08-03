@@ -29,8 +29,13 @@ int main(int argc, char const *argv[]) {
 
   LLVMContextRef context = LLVMGetGlobalContext();
   LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
-
   LLVMPositionBuilderAtEnd(builder, entry);
+
+  LLVMTypeRef te = LLVMInt32Type();
+  LLVMValueRef val = LLVMBuildAlloca(builder, te, "uei");
+  LLVMBuildStore(builder, LLVMConstInt(te, 31, 0), val);
+  LLVMBuildLoad(builder, val, "uei");
+
   LLVMValueRef tmp = LLVMBuildAdd(builder, LLVMGetParam(sum, 0), LLVMGetParam(sum, 1), "tmp");
   LLVMBuildRet(builder, tmp);
 
@@ -56,11 +61,20 @@ int main(int argc, char const *argv[]) {
   }
 
   LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 6), "simple_value");
-  LLVMSetInitializer(GlobalVar, LLVMConstString("nyan", 6, 1));
-  uint64_t raw = LLVMGetGlobalValueAddress(engine, "simple_value");
-  printf("%s\n", raw);
+  LLVMValueRef TempStr = LLVMConstString("nyan", 6, 1);
+  LLVMSetInitializer(GlobalVar, TempStr);
+  // uint64_t raw = LLVMGetGlobalValueAddress(engine, "simple_value");
+  // printf("%s\n", raw);
 
-  llvmGenLocalStringVar(mod, "abc", 3);
+  // SmallVector<uintptr_t,20> ho;
+  // LLVMValueRef ho = LLVMAddGlobal(mod, "sum", LLVMArrayType(LLVMInt8Type(), 6));
+
+  LLVMValueRef aa = LLVMBuildGEP(builder, GlobalVar, &TempStr, 1, "simple_value");
+  // LLVMSetInitializer(aa, TempStr);
+    // let temp_str = LLVMBuildLoad(llvm_builder.builder, llvm_value, val_name.as_ptr());
+
+  // llvmGenLocalStringVar(mod, "abc", 3);
+
 
   LLVMDumpModule(mod);
 
