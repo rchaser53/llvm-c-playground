@@ -65,16 +65,16 @@ int main(int argc, char const *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 6), "simple_value");
-  LLVMValueRef TempStr = LLVMConstString("nyan", 6, 1);
-  LLVMSetInitializer(GlobalVar, TempStr);
-  // uint64_t raw = LLVMGetGlobalValueAddress(engine, "simple_value");
-  // printf("%s\n", raw);
+  // LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 6), "simple_value");
+  // LLVMValueRef TempStr = LLVMConstString("nyan", 6, 1);
+  // LLVMSetInitializer(GlobalVar, TempStr);
+  // // uint64_t raw = LLVMGetGlobalValueAddress(engine, "simple_value");
+  // // printf("%s\n", raw);
 
-  // SmallVector<uintptr_t,20> ho;
-  // LLVMValueRef ho = LLVMAddGlobal(mod, "sum", LLVMArrayType(LLVMInt8Type(), 6));
+  // // SmallVector<uintptr_t,20> ho;
+  // // LLVMValueRef ho = LLVMAddGlobal(mod, "sum", LLVMArrayType(LLVMInt8Type(), 6));
 
-  LLVMValueRef aa = LLVMBuildGEP(builder, GlobalVar, &TempStr, 1, "simple_value");
+  // LLVMValueRef aa = LLVMBuildInBoundsGEP(builder, GlobalVar, &TempStr, 1, "simple_value");
   // LLVMSetInitializer(aa, TempStr);
     // let temp_str = LLVMBuildLoad(llvm_builder.builder, llvm_value, val_name.as_ptr());
 
