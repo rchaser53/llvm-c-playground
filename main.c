@@ -34,9 +34,8 @@ int main(int argc, char const *argv[]) {
   LLVMTypeRef te = LLVMInt32Type();
   LLVMValueRef val = LLVMBuildAlloca(builder, te, "uei");
   LLVMBuildStore(builder, LLVMConstInt(te, 31, 0), val);
-  LLVMBuildLoad(builder, val, "uei");
-
-  LLVMValueRef tmp = LLVMBuildAdd(builder, LLVMGetParam(sum, 0), LLVMGetParam(sum, 1), "tmp");
+  // LLVMBuildLoad(builder, val, "uei");
+  LLVMValueRef tmp = LLVMBuildAdd(builder, LLVMGetParam(sum, 0), LLVMBuildLoad(builder, val, "uei"), "tmp");
   LLVMBuildRet(builder, tmp);
 
   char *error = NULL;
