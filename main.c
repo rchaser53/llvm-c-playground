@@ -91,3 +91,13 @@ int main(int argc, char const *argv[]) {
   LLVMDisposeBuilder(builder);
   LLVMDisposeExecutionEngine(engine);
 }
+
+  // this remove
+    /**
+    * Remove a function from its containing module and deletes it.
+    *
+    * @see llvm::Function::eraseFromParent()
+    */
+    // void LLVMDeleteFunction(LLVMValueRef Fn);
+  // ex.
+  //  LLVMDeleteFunction(sum);
