@@ -18,17 +18,19 @@ LLVMValueRef llvmGenLocalStringVar(LLVMModuleRef mod, const char* data, int len)
   return glob;
 }
 
+#define DESC_VTABLE 16
+
 int main(int argc, char const *argv[]) {
   LLVMModuleRef mod = LLVMModuleCreateWithName("my_module");
 
   LLVMTypeRef param_types[] = { LLVMInt32Type(), LLVMInt32Type() };
   LLVMTypeRef ret_type = LLVMFunctionType(LLVMInt32Type(), param_types, 2, 0);
-  LLVMValueRef sum = LLVMAddFunction(mod, "sum", ret_type);
+  LLVMValueRef sum = LLVMAddFunction(mod, "main", ret_type);
 
   // what is an address space?
   LLVMTypeRef nyans[] = { LLVMPointerType(LLVMInt8Type(), 0) };
   LLVMTypeRef rettype = LLVMFunctionType(LLVMInt32Type(), nyans, 1, 0);
-  LLVMAddFunction(mod, "puts", rettype);
+  LLVMValueRef puts_fn = LLVMAddFunction(mod, "puts", rettype);
 
   LLVMBasicBlockRef entry = LLVMAppendBasicBlock(sum, "entry");
 
@@ -44,8 +46,13 @@ int main(int argc, char const *argv[]) {
   LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 6), "simple_value");
   LLVMValueRef TempStr = LLVMConstString("nyan", 6, 1);
   LLVMSetInitializer(GlobalVar, TempStr);
-  LLVMValueRef aa = LLVMBuildInBoundsGEP(builder, GlobalVar, &TempStr, 1, "simple_value");
-  LLVMBuildLoad(builder, aa, "as");
+
+  LLVMValueRef gep[2];
+  gep[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+
+  LLVMValueRef aaa = LLVMBuildInBoundsGEP(builder, GlobalVar, gep, 2, "simple_value");
+  LLVMBuildCall(builder, puts_fn, &aaa, 1, "puts");
 
   LLVMBuildRet(builder, tmp);
 
@@ -70,27 +77,13 @@ int main(int argc, char const *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  // LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 6), "simple_value");
-  // LLVMValueRef TempStr = LLVMConstString("nyan", 6, 1);
-  // LLVMSetInitializer(GlobalVar, TempStr);
-  // // uint64_t raw = LLVMGetGlobalValueAddress(engine, "simple_value");
-  // // printf("%s\n", raw);
-
-  // // SmallVector<uintptr_t,20> ho;
-  // // LLVMValueRef ho = LLVMAddGlobal(mod, "sum", LLVMArrayType(LLVMInt8Type(), 6));
-
-  // LLVMValueRef aa = LLVMBuildInBoundsGEP(builder, GlobalVar, &TempStr, 1, "simple_value");
-  // LLVMSetInitializer(aa, TempStr);
-    // let temp_str = LLVMBuildLoad(llvm_builder.builder, llvm_value, val_name.as_ptr());
-
-  // llvmGenLocalStringVar(mod, "abc", 3);
-
-
   LLVMDumpModule(mod);
 
   LLVMDisposeBuilder(builder);
   LLVMDisposeExecutionEngine(engine);
 }
+
+
 
   // this remove
     /**
