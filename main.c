@@ -8,23 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-LLVMValueRef llvmGenLocalStringVar(LLVMModuleRef mod, const char* data, int len) {
-  LLVMValueRef glob = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), len), "string");
-
-  LLVMSetLinkage(glob, LLVMInternalLinkage);
-  LLVMSetGlobalConstant(glob, 1);
-  LLVMSetInitializer(glob, LLVMConstString(data, len, 1));
-
-  return glob;
-}
-
-#define DESC_VTABLE 16
-
 int main(int argc, char const *argv[]) {
   LLVMModuleRef mod = LLVMModuleCreateWithName("my_module");
 
-  // LLVMTypeRef param_types[] = { LLVMInt32Type(), LLVMPointerType(LLVMPointerType(LLVMInt8Type(), 0), 0) };
-  // LLVMTypeRef ret_type = LLVMFunctionType(LLVMInt32Type(), param_types, 2, 0);
   LLVMTypeRef param_types[] = { LLVMInt32Type() };
   LLVMTypeRef ret_type = LLVMFunctionType(LLVMInt32Type(), param_types, 1, 0);
   LLVMValueRef main = LLVMAddFunction(mod, "main", ret_type);
@@ -40,23 +26,16 @@ int main(int argc, char const *argv[]) {
   LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
   LLVMPositionBuilderAtEnd(builder, entry);
 
-  LLVMTypeRef te = LLVMInt32Type();
-  LLVMValueRef val = LLVMBuildAlloca(builder, te, "uei");
-  LLVMBuildStore(builder, LLVMConstInt(te, 31, 0), val);
-  LLVMValueRef tmp = LLVMBuildAdd(builder, LLVMGetParam(main, 0), LLVMBuildLoad(builder, val, "uei"), "tmp");
+  LLVMValueRef range[2];
+  range[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  range[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
 
   LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 6), "simple_value");
-  LLVMValueRef TempStr = LLVMConstString("nyan", 6, 1);
-  LLVMSetInitializer(GlobalVar, TempStr);
-
-  LLVMValueRef gep[2];
-  gep[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-
-  LLVMValueRef aaa = LLVMBuildInBoundsGEP(builder, GlobalVar, gep, 2, "simple_value");
-  LLVMBuildCall(builder, puts_fn, &aaa, 1, "puts");
-
-  LLVMBuildRet(builder, tmp);
+  LLVMValueRef simple_value_pointer = LLVMBuildInBoundsGEP(builder, GlobalVar, range, 2, "simple_value");
+  LLVMSetInitializer(GlobalVar, LLVMConstString("nya-n", 6, 1));
+  LLVMBuildCall(builder, puts_fn, &simple_value_pointer, 1, "puts");
+  
+  LLVMBuildRet(builder, LLVMConstInt(LLVMInt32Type(), 31, 0));
 
   char *error = NULL;
   LLVMVerifyModule(mod, LLVMAbortProcessAction, &error);
