@@ -67,6 +67,7 @@ int main(int argc, char const *argv[])
   LLVMDumpModule(mod);
 
   emit_file(mod, "abc.ll");
+  ho();
 
   LLVMDisposeBuilder(builder);
   LLVMDisposeExecutionEngine(engine);
