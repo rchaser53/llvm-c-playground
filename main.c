@@ -8,9 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../header/util.h"
+#include "./header/util.h"
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[])
+{
   LLVMModuleRef mod = LLVMModuleCreateWithName("my_module");
 
   LLVMTypeRef param_types[] = { LLVMInt32Type() };
@@ -65,8 +66,7 @@ int main(int argc, char const *argv[]) {
   }
   LLVMDumpModule(mod);
 
-  LLVMGenericValueRef exec_args[] = { LLVMCreateGenericValueOfInt(LLVMInt32Type(), 1, 0)};
-  LLVMRunFunction(engine, main, 1, exec_args);
+  emit_file(mod, "abc.ll");
 
   LLVMDisposeBuilder(builder);
   LLVMDisposeExecutionEngine(engine);
@@ -82,6 +82,10 @@ int main(int argc, char const *argv[]) {
   // ex.
   //  LLVMDeleteFunction(sum);
 
+  // run function
+  // LLVMGenericValueRef exec_args[] = { LLVMCreateGenericValueOfInt(LLVMInt32Type(), 1, 0)};
+  // LLVMRunFunction(engine, main, 1, exec_args);
+
 LLVMValueRef codegen_string(LLVMModuleRef module, LLVMContextRef context, const char* str, size_t len)
 {
   LLVMValueRef str_val = LLVMConstStringInContext(context, str, (int)len, 0);
@@ -95,4 +99,13 @@ LLVMValueRef codegen_string(LLVMModuleRef module, LLVMContextRef context, const 
   args[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
   args[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
   return LLVMConstInBoundsGEP(g_str, args, 2);
+}
+
+void emit_file(LLVMModuleRef module, const char * filename)
+{
+  char *errorMessage = NULL;
+  if(LLVMPrintModuleToFile(module, filename, &errorMessage) ) {
+    fprintf(stderr, "%s\n", errorMessage);
+    LLVMDisposeMessage(errorMessage);
+  }
 }
