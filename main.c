@@ -3,6 +3,8 @@
 #include <llvm-c/Target.h>
 #include <llvm-c/Analysis.h>
 #include <llvm-c/BitWriter.h>
+#include <llvm-c/Transforms/Scalar.h>
+
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -47,6 +49,8 @@ int main(int argc, char const *argv[])
   LLVMVerifyModule(mod, LLVMAbortProcessAction, &error);
   LLVMDisposeMessage(error);
 
+  optimization(mod);
+
   LLVMExecutionEngineRef engine;
   error = NULL;
   LLVMLinkInMCJIT();
@@ -71,6 +75,16 @@ int main(int argc, char const *argv[])
 
   LLVMDisposeBuilder(builder);
   LLVMDisposeExecutionEngine(engine);
+}
+
+void optimization(LLVMModuleRef mod)
+{
+  LLVMPassManagerRef pas_manager = LLVMCreateFunctionPassManagerForModule(mod);
+  LLVMAddInstructionCombiningPass(pas_manager);
+  LLVMAddReassociatePass(pas_manager);
+  LLVMAddGVNPass(pas_manager);
+  LLVMAddCFGSimplificationPass(pas_manager);
+  LLVMInitializeFunctionPassManager(pas_manager);
 }
 
   // this remove
