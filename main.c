@@ -42,12 +42,29 @@ int main(int argc, char const *argv[])
   LLVMValueRef simple_value_pointer = LLVMBuildInBoundsGEP(builder, GlobalVar, range, 2, "simple_value");
   LLVMSetInitializer(GlobalVar, LLVMConstString("\nHello World!", 15, 1));
   LLVMBuildCall(builder, puts_fn, &simple_value_pointer, 1, "");
-  
-  LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
 
-  LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "nyan");
-  LLVMValueRef branch = LLVMBuildBr(builder, left_block);
+  LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
+  LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "left");
+  LLVMBasicBlockRef right_block = LLVMAppendBasicBlockInContext(context, main, "right");
+
+  LLVMBuildCondBr(builder, LLVMConstInt(LLVMInt1TypeInContext(context), 1, 0), left_block, right_block);
+
   LLVMPositionBuilderAtEnd(builder, left_block);
+  LLVMBuildBr(builder, right_block);
+  LLVMPositionBuilderAtEnd(builder, right_block);
+  
+  // LLVMBuildCondBr
+  
+
+  
+  // LLVMPositionBuilderAtEnd(builder, right_block);
+
+  
+  // LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
+
+  // LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "nyan");
+  // LLVMValueRef branch = LLVMBuildBr(builder, left_block);
+  // LLVMPositionBuilderAtEnd(builder, left_block);
 
   LLVMBuildRet(builder, LLVMConstInt(LLVMInt32Type(), 31, 0));
 
