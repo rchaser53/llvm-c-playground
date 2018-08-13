@@ -47,26 +47,20 @@ int main(int argc, char const *argv[])
   LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "left");
   LLVMBasicBlockRef right_block = LLVMAppendBasicBlockInContext(context, main, "right");
 
+
+  LLVMValueRef val = LLVMBuildAlloca(builder, LLVMInt32Type(), "ret_val");
+  LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 11, 0), val);
+
+
   LLVMBuildCondBr(builder, LLVMConstInt(LLVMInt1TypeInContext(context), 1, 0), left_block, right_block);
 
   LLVMPositionBuilderAtEnd(builder, left_block);
+
+  LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 22, 0), val);
   LLVMBuildBr(builder, right_block);
   LLVMPositionBuilderAtEnd(builder, right_block);
-  
-  // LLVMBuildCondBr
-  
 
-  
-  // LLVMPositionBuilderAtEnd(builder, right_block);
-
-  
-  // LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
-
-  // LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "nyan");
-  // LLVMValueRef branch = LLVMBuildBr(builder, left_block);
-  // LLVMPositionBuilderAtEnd(builder, left_block);
-
-  LLVMBuildRet(builder, LLVMConstInt(LLVMInt32Type(), 31, 0));
+  LLVMBuildRet(builder, LLVMBuildLoad(builder, val, "ret_val"));
 
   char *error = NULL;
   LLVMVerifyModule(mod, LLVMAbortProcessAction, &error);
