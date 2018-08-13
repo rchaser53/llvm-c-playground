@@ -43,6 +43,12 @@ int main(int argc, char const *argv[])
   LLVMSetInitializer(GlobalVar, LLVMConstString("\nHello World!", 15, 1));
   LLVMBuildCall(builder, puts_fn, &simple_value_pointer, 1, "");
   
+  LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
+
+  LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "nyan");
+  LLVMValueRef branch = LLVMBuildBr(builder, left_block);
+  LLVMPositionBuilderAtEnd(builder, left_block);
+
   LLVMBuildRet(builder, LLVMConstInt(LLVMInt32Type(), 31, 0));
 
   char *error = NULL;
