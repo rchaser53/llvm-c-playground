@@ -21,9 +21,13 @@ int main(int argc, char const *argv[])
   LLVMValueRef main = LLVMAddFunction(mod, "main", ret_type);
 
   // what is an address space?
-  LLVMTypeRef nyans[] = { LLVMPointerType(LLVMInt8Type(), 0) };
-  LLVMTypeRef rettype = LLVMFunctionType(LLVMInt32Type(), nyans, 1, 0);
-  LLVMValueRef puts_fn = LLVMAddFunction(mod, "puts", rettype);
+  LLVMTypeRef puts_args_type_list[] = { LLVMPointerType(LLVMInt8Type(), 0) };
+  LLVMTypeRef puts_type = LLVMFunctionType(LLVMInt32Type(), puts_args_type_list, 1, 0);
+  LLVMValueRef puts_fn = LLVMAddFunction(mod, "puts", puts_type);
+
+  LLVMTypeRef printf_args_type_list[] = { LLVMPointerType(LLVMInt8Type(), 0) };
+  LLVMTypeRef printf_type = LLVMFunctionType(LLVMInt32Type(), printf_args_type_list, 0, 1);
+  LLVMValueRef printf_fn = LLVMAddFunction(mod, "printf", printf_type);
 
   LLVMBasicBlockRef entry = LLVMAppendBasicBlock(main, "entry");
 
@@ -38,10 +42,8 @@ int main(int argc, char const *argv[])
   LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "left");
   LLVMBasicBlockRef right_block = LLVMAppendBasicBlockInContext(context, main, "right");
 
-
   LLVMValueRef val = LLVMBuildAlloca(builder, LLVMInt32Type(), "ret_val");
   LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 11, 0), val);
-
 
   LLVMBuildCondBr(builder, LLVMConstInt(LLVMInt1TypeInContext(context), 1, 0), left_block, right_block);
 
