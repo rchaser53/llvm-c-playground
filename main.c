@@ -12,6 +12,13 @@
 
 #include "./header/util.h"
 
+LLVMValueRef create_printf_int(LLVMModuleRef mod, LLVMContextRef context)
+{
+  LLVMTypeRef printf_args_type_list[] = { LLVMPointerType(LLVMInt8Type(), 0) };
+  LLVMTypeRef printf_type = LLVMFunctionType(LLVMInt32Type(), printf_args_type_list, 0, 1);
+  return LLVMAddFunction(mod, "printf", printf_type);
+}
+
 int main(int argc, char const *argv[])
 {
   LLVMModuleRef mod = LLVMModuleCreateWithName("my_module");
@@ -20,21 +27,14 @@ int main(int argc, char const *argv[])
   LLVMTypeRef ret_type = LLVMFunctionType(LLVMInt32Type(), param_types, 1, 0);
   LLVMValueRef main = LLVMAddFunction(mod, "main", ret_type);
 
-  // what is an address space?
-  LLVMTypeRef printf_args_type_list[] = { LLVMPointerType(LLVMInt8Type(), 0) };
-  LLVMTypeRef printf_type = LLVMFunctionType(LLVMInt32Type(), printf_args_type_list, 0, 1);
-  LLVMValueRef printf_fn = LLVMAddFunction(mod, "printf", printf_type);
-
   LLVMBasicBlockRef entry = LLVMAppendBasicBlock(main, "entry");
 
   LLVMContextRef context = LLVMGetGlobalContext();
   LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
   LLVMPositionBuilderAtEnd(builder, entry);
 
-  LLVMValueRef printf_args[] = {
-    codegen_string(mod, context, "%d\n"), LLVMConstInt(LLVMInt32Type(), 28, 0)
-  };
-  LLVMBuildCall(builder, printf_fn, printf_args, 2, "");
+  LLVMValueRef llvm_printf_int = create_printf_int(mod, context);
+
 
   LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
   LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "left");
@@ -43,7 +43,7 @@ int main(int argc, char const *argv[])
   LLVMValueRef val = LLVMBuildAlloca(builder, LLVMInt32Type(), "ret_val");
   LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 11, 0), val);
 
-  LLVMBuildCondBr(builder, LLVMConstInt(LLVMInt1TypeInContext(context), 1, 0), left_block, right_block);
+  LLVMBuildCondBr(builder, LLVMConstInt(LLVMInt1TypeInContext(context), 0, 0), left_block, right_block);
 
   LLVMPositionBuilderAtEnd(builder, left_block);
 
@@ -51,6 +51,10 @@ int main(int argc, char const *argv[])
   LLVMBuildBr(builder, right_block);
   LLVMPositionBuilderAtEnd(builder, right_block);
 
+  LLVMValueRef printf_args[] = {
+    codegen_string(mod, context, "%d\n"), LLVMBuildLoad(builder, val, "ret_val")
+  };
+  LLVMBuildCall(builder, llvm_printf_int, printf_args, 2, "");
   LLVMBuildRet(builder, LLVMBuildLoad(builder, val, "ret_val"));
 
   char *error = NULL;
