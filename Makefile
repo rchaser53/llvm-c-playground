@@ -5,17 +5,15 @@ LDFLAGS=`llvm-config --cxxflags --ldflags --libs core executionengine mcjit inte
 
 all: main
 
-main.o: main.c temp.c
-	$(CC) $(CFLAGS) -c main.c temp.c
+main.o: main.c util.c
+	$(CC) $(CFLAGS) -c main.c util.c
 
-main: main.o temp.o
-	$(LD) main.o temp.o $(LDFLAGS) -o $@
+main: main.o util.o
+	$(LD) main.o util.o $(LDFLAGS) -o $@
 
-main.bc: main
+exec: main
 	./main
-
-main.ll: main.bc
-	llvm-dis $<
+	lli main.ll
 
 clean:
-	-rm -f main.o main main.bc main.ll temp.o
+	-rm -f main.o main main.bc main.ll util.o

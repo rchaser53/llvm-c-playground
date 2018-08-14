@@ -31,17 +31,8 @@ int main(int argc, char const *argv[])
   LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
   LLVMPositionBuilderAtEnd(builder, entry);
 
-  const char error_msg_str[] = "Error: couldn't start runtime!";
-  LLVMValueRef honto = codegen_string(mod, context, error_msg_str, sizeof(error_msg_str) - 1);
-
-  LLVMValueRef range[2];
-  range[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  range[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-
-  LLVMValueRef GlobalVar = LLVMAddGlobal(mod, LLVMArrayType(LLVMInt8Type(), 15), "simple_value");
-  LLVMValueRef simple_value_pointer = LLVMBuildInBoundsGEP(builder, GlobalVar, range, 2, "simple_value");
-  LLVMSetInitializer(GlobalVar, LLVMConstString("\nHello World!", 15, 1));
-  LLVMBuildCall(builder, puts_fn, &simple_value_pointer, 1, "");
+  LLVMValueRef put_str = codegen_string(mod, context, "abc");
+  LLVMBuildCall(builder, puts_fn, &put_str, 1, "");
 
   LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
   LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "left");
@@ -87,8 +78,7 @@ int main(int argc, char const *argv[])
   }
   LLVMDumpModule(mod);
 
-  emit_file(mod, "abc.ll");
-  ho();
+  emit_file(mod, "main.ll");
 
   LLVMDisposeBuilder(builder);
   LLVMDisposeExecutionEngine(engine);
@@ -117,27 +107,3 @@ void optimization(LLVMModuleRef mod)
   // run function
   // LLVMGenericValueRef exec_args[] = { LLVMCreateGenericValueOfInt(LLVMInt32Type(), 1, 0)};
   // LLVMRunFunction(engine, main, 1, exec_args);
-
-LLVMValueRef codegen_string(LLVMModuleRef module, LLVMContextRef context, const char* str, size_t len)
-{
-  LLVMValueRef str_val = LLVMConstStringInContext(context, str, (int)len, 0);
-  LLVMValueRef g_str = LLVMAddGlobal(module, LLVMTypeOf(str_val), "");
-  LLVMSetLinkage(g_str, LLVMPrivateLinkage);
-  LLVMSetInitializer(g_str, str_val);
-  LLVMSetGlobalConstant(g_str, 1);
-  LLVMSetUnnamedAddr(g_str, 1);
-
-  LLVMValueRef args[2];
-  args[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  args[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  return LLVMConstInBoundsGEP(g_str, args, 2);
-}
-
-void emit_file(LLVMModuleRef module, const char * filename)
-{
-  char *errorMessage = NULL;
-  if(LLVMPrintModuleToFile(module, filename, &errorMessage) ) {
-    fprintf(stderr, "%s\n", errorMessage);
-    LLVMDisposeMessage(errorMessage);
-  }
-}
