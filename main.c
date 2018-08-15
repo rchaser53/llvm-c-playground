@@ -5,19 +5,11 @@
 #include <llvm-c/BitWriter.h>
 #include <llvm-c/Transforms/Scalar.h>
 
-
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "./header/util.h"
-
-LLVMValueRef create_printf_int(LLVMModuleRef mod, LLVMContextRef context)
-{
-  LLVMTypeRef printf_args_type_list[] = { LLVMPointerType(LLVMInt8Type(), 0) };
-  LLVMTypeRef printf_type = LLVMFunctionType(LLVMInt32Type(), printf_args_type_list, 0, 1);
-  return LLVMAddFunction(mod, "printf", printf_type);
-}
 
 int main(int argc, char const *argv[])
 {
@@ -31,10 +23,11 @@ int main(int argc, char const *argv[])
 
   LLVMContextRef context = LLVMGetGlobalContext();
   LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
-  LLVMPositionBuilderAtEnd(builder, entry);
+  LlvmStruct ls = *createLlvm(mod, context, builder);
 
-  LLVMValueRef llvm_printf_int = create_printf_int(mod, context);
+  LLVMPositionBuilderAtEnd(ls.builder, entry);
 
+  LLVMValueRef llvm_printf_int = create_printf_int(ls);
 
   LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
   LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "left");
