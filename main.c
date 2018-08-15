@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
     codegen_string(mod, context, "%d\n"), LLVMBuildLoad(builder, val, "ret_val")
   };
   LLVMBuildCall(builder, llvm_printf_int, printf_args, 2, "");
-  LLVMBuildRet(builder, LLVMBuildLoad(builder, val, "ret_val"));
+  LLVMBuildRet(builder, LLVMConstInt(LLVMInt32Type(), 0, 0));
 
   char *error = NULL;
   LLVMVerifyModule(mod, LLVMAbortProcessAction, &error);
