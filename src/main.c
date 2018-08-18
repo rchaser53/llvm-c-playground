@@ -11,6 +11,12 @@
 
 #include "./header/util.h"
 
+// LLVMValueRef is_cmp_llvm_int(LlvmStruct ls, LLVMIntPredicate cmp, int lhs_val, int rhs_val) {
+//   LLVMValueRef LHS = LLVMConstInt(LLVMInt32Type(), lhs_val, 0);
+//   LLVMValueRef RHS = LLVMConstInt(LLVMInt32Type(), rhs_val, 0);
+//   return LLVMBuildICmp(ls.builder, cmp, LHS, RHS, "");
+// }
+
 int main(int argc, char const *argv[])
 {
   LLVMModuleRef mod = LLVMModuleCreateWithName("my_module");
@@ -29,26 +35,32 @@ int main(int argc, char const *argv[])
 
   LLVMValueRef llvm_printf_int = create_printf_int(ls);
 
-  LLVMBasicBlockRef entry_block = LLVMGetInsertBlock(builder);
-  LLVMBasicBlockRef left_block = LLVMAppendBasicBlockInContext(context, main, "left");
-  LLVMBasicBlockRef right_block = LLVMAppendBasicBlockInContext(context, main, "right");
+  LLVMValueRef val = LLVMBuildAlloca(builder, LLVMInt32Type(), "");
+  LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 0, 0), val);
 
-  LLVMValueRef val = LLVMBuildAlloca(builder, LLVMInt32Type(), "ret_val");
-  LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 11, 0), val);
+  LLVMBasicBlockRef true_block = LLVMAppendBasicBlockInContext(context, main, "true_block");
+  LLVMBasicBlockRef false_block = LLVMAppendBasicBlockInContext(context, main, "false_block");
+  LLVMBasicBlockRef if_end_block = LLVMAppendBasicBlockInContext(context, main, "if_end");
 
-  // LLVMBuildCondBr(builder, LLVMConstInt(LLVMInt1TypeInContext(context), 0, 0), left_block, right_block);
-  LLVMBuildCondBr(builder, is_equal_int(ls, 3, 4), left_block, right_block);
+  LLVMBuildBr(builder, true_block);
+  LLVMPositionBuilderAtEnd(builder, true_block);
 
-  LLVMPositionBuilderAtEnd(builder, left_block);
+  LLVMValueRef load_val = LLVMBuildLoad(builder, val, "");
+  LLVMValueRef lhs = LLVMBuildAdd(builder, LLVMConstInt(LLVMInt32Type(), 1, 0), load_val, "");
+  LLVMBuildStore(builder, lhs, val);
 
-  LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 22, 0), val);
-  LLVMBuildBr(builder, right_block);
-  LLVMPositionBuilderAtEnd(builder, right_block);
+  LLVMValueRef if_cond = LLVMBuildICmp(ls.builder, LLVMIntUGT, lhs, LLVMConstInt(LLVMInt32Type(), 3, 0), "cond_val");
+
+  LLVMBuildCondBr(builder, if_cond, if_end_block, false_block);
+  LLVMPositionBuilderAtEnd(builder, false_block);
 
   LLVMValueRef printf_args[] = {
     codegen_string(mod, context, "%d\n"), LLVMBuildLoad(builder, val, "ret_val")
   };
   LLVMBuildCall(builder, llvm_printf_int, printf_args, 2, "");
+  LLVMBuildBr(builder, true_block);
+  LLVMPositionBuilderAtEnd(builder, if_end_block);
+
   LLVMBuildRet(builder, LLVMConstInt(LLVMInt32Type(), 0, 0));
 
   char *error = NULL;
