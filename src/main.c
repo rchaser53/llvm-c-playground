@@ -34,6 +34,16 @@ int main(int argc, char const *argv[])
   LlvmStruct ls = *createLlvm(mod, context, builder);
   LLVMPositionBuilderAtEnd(ls.builder, entry);
 
+  /**/
+  LLVMTypeRef struct_param[] = { LLVMInt32Type() };
+
+  LLVMTypeRef lfi_type = LLVMStructTypeInContext(context, struct_param, 1, 0);
+  LLVMValueRef lfi_object = LLVMBuildAlloca(builder, lfi_type, "");
+
+  LLVMValueRef field = LLVMBuildStructGEP(builder, lfi_object, 0, "");
+  LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 1, 0), field);
+  /**/
+
   LLVMValueRef llvm_printf_int = create_printf_int(ls);
 
   LLVMValueRef val = LLVMBuildAlloca(builder, LLVMInt32Type(), "");
@@ -44,7 +54,7 @@ int main(int argc, char const *argv[])
 
   // loop
   LLVMValueRef load_val = LLVMBuildLoad(builder, val, "");
-  LLVMValueRef lhs = LLVMBuildAdd(builder, LLVMConstInt(LLVMInt32Type(), 1, 0), load_val, "");
+  LLVMValueRef lhs = LLVMBuildAdd(builder, LLVMConstInt(LLVMInt32Type(), 1, 0), load_val, "a.b");
   LLVMBuildStore(builder, lhs, val);
 
   LLVMValueRef printf_args[] = {
