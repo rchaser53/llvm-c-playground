@@ -38,10 +38,14 @@ int main(int argc, char const *argv[])
   LLVMTypeRef struct_param[] = { LLVMInt32Type() };
 
   LLVMTypeRef lfi_type = LLVMStructTypeInContext(context, struct_param, 1, 0);
-  LLVMValueRef lfi_object = LLVMBuildAlloca(builder, lfi_type, "");
+  LLVMValueRef g_str = LLVMAddGlobal(mod, lfi_type, "nyan");
+  // LLVMValueRef g_str = LLVMAddGlobalInAddressSpace(mod, lfi_type, "nyan", 0);
+  // LLVMSetLinkage(g_str, LLVMPrivateLinkage);
 
-  LLVMValueRef field = LLVMBuildStructGEP(builder, lfi_object, 0, "");
-  LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 1, 0), field);
+  // LLVMValueRef lfi_object = LLVMBuildAlloca(builder, lfi_type, "");
+
+  // LLVMValueRef field = LLVMBuildStructGEP(builder, lfi_object, 0, "");
+  // LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 1, 0), field);
   /**/
 
   LLVMValueRef llvm_printf_int = create_printf_int(ls);
