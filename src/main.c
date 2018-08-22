@@ -30,8 +30,8 @@ int main(int argc, char const *argv[])
   /**/
   LLVMTypeRef struct_param[] = { LLVMInt32Type() };
   LLVMTypeRef lfi_type = LLVMStructTypeInContext(context, struct_param, 1, 0);
-  LLVMValueRef struct_vals = { LLVMConstInt(LLVMInt32Type(), 2, 0) };
-  LLVMValueRef inst = LLVMConstNamedStruct(lfi_type, &struct_vals, 1);
+  LLVMValueRef struct_vals = { LLVMConstInt(LLVMInt32Type(), 22, 0) };
+  LLVMValueRef inst = LLVMConstNamedStruct(lfi_type, &struct_vals, 0);
 
   LLVMTypeRef closure_param_types[] = { lfi_type, LLVMInt32Type() };
   LLVMTypeRef func_type = LLVMFunctionType(LLVMInt32Type(), closure_param_types, 2, 0);
@@ -39,14 +39,19 @@ int main(int argc, char const *argv[])
   LLVMBasicBlockRef closure_entry = LLVMAppendBasicBlock(closure, "entry");
   LLVMPositionBuilderAtEnd(builder, closure_entry);
 
-  // LLVMValueRef for_gep[2];
-  // for_gep[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  // for_gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  LLVMValueRef for_gep[2];
+  for_gep[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  for_gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
   // LLVMValueRef hoehoe = LLVMConstInBoundsGEP(LLVMGetParam(closure, 0), for_gep, 0);
+
+  LLVMValueRef hoehoe = LLVMBuildInBoundsGEP(builder, struct_vals, for_gep, 1, "");
+  // LLVMValueRef field_info = LLVMBuildLoad(builder, hoehoe, "");
+  // LLVMValueRef inner_hoge = LLVMBuildInBoundsGEP(builder, hoehoe, for_gep, 0, "");
+  // LLVMValueRef hoehoe = LLVMGetParam(closure, 0);
 
   LLVMValueRef mesokun = LLVMGetParam(closure, 1);
 
-  LLVMValueRef closure_ret = LLVMBuildAdd(builder, LLVMConstInt(LLVMInt32Type(), 11, 0), mesokun, "aa");
+  LLVMValueRef closure_ret = LLVMBuildAdd(builder, hoehoe, LLVMConstInt(LLVMInt32Type(), 11, 0), "aa");
 
   LLVMBuildRet(builder, closure_ret);
   /**/
