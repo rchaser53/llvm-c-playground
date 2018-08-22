@@ -16,39 +16,55 @@
 //   LLVMValueRef RHS = LLVMConstInt(LLVMInt32Type(), rhs_val, 0);
 //   return LLVMBuildICmp(ls.builder, cmp, LHS, RHS, "");
 // }
+// (a) => (b) => a * b;
 
 int main(int argc, char const *argv[])
 {
+  /* setup */
   LLVMModuleRef mod = LLVMModuleCreateWithName("my_module");
-
-  LLVMTypeRef param_types[] = { LLVMInt32Type() };
-  LLVMTypeRef ret_type = LLVMFunctionType(LLVMInt32Type(), param_types, 1, 0);
-  LLVMValueRef main = LLVMAddFunction(mod, "main", ret_type);
-
-  LLVMBasicBlockRef entry = LLVMAppendBasicBlock(main, "entry");
   LLVMContextRef context = LLVMGetGlobalContext();
-  LLVMBasicBlockRef loop_block = LLVMAppendBasicBlockInContext(context, main, "loop");
-  LLVMBasicBlockRef loop_end_block = LLVMAppendBasicBlockInContext(context, main, "loop_end");
   LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
-
   LlvmStruct ls = *createLlvm(mod, context, builder);
-  LLVMPositionBuilderAtEnd(ls.builder, entry);
+  /**/
 
   /**/
   LLVMTypeRef struct_param[] = { LLVMInt32Type() };
-
   LLVMTypeRef lfi_type = LLVMStructTypeInContext(context, struct_param, 1, 0);
-
   LLVMValueRef struct_vals = { LLVMConstInt(LLVMInt32Type(), 2, 0) };
   LLVMValueRef inst = LLVMConstNamedStruct(lfi_type, &struct_vals, 1);
-  LLVMValueRef g_inst = LLVMAddGlobal(mod, lfi_type, "ab");
-  LLVMSetInitializer(g_inst, inst);
 
-  // LLVMValueRef lfi_object = LLVMBuildAlloca(builder, lfi_type, "");
+  LLVMTypeRef closure_param_types[] = { lfi_type, LLVMInt32Type() };
+  LLVMTypeRef func_type = LLVMFunctionType(LLVMInt32Type(), closure_param_types, 2, 0);
+  LLVMValueRef closure = LLVMAddFunction(mod, "closure", func_type);
+  LLVMBasicBlockRef closure_entry = LLVMAppendBasicBlock(closure, "entry");
+  LLVMPositionBuilderAtEnd(builder, closure_entry);
 
-  // LLVMValueRef field = LLVMBuildStructGEP(builder, g_inst, 0, "");
-  // LLVMBuildStore(builder, LLVMConstInt(LLVMInt32Type(), 1, 0), field);
+  // LLVMValueRef for_gep[2];
+  // for_gep[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  // for_gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  // LLVMValueRef hoehoe = LLVMConstInBoundsGEP(LLVMGetParam(closure, 0), for_gep, 0);
+
+  LLVMValueRef mesokun = LLVMGetParam(closure, 1);
+
+  LLVMValueRef closure_ret = LLVMBuildAdd(builder, LLVMConstInt(LLVMInt32Type(), 11, 0), mesokun, "aa");
+
+  LLVMBuildRet(builder, closure_ret);
   /**/
+
+
+
+  /**/
+  LLVMTypeRef param_types[] = { LLVMInt32Type() };
+  LLVMTypeRef ret_type = LLVMFunctionType(LLVMInt32Type(), param_types, 1, 0);
+  LLVMValueRef main = LLVMAddFunction(mod, "main", ret_type);
+  LLVMBasicBlockRef entry = LLVMAppendBasicBlock(main, "entry");
+  
+  LLVMBasicBlockRef loop_block = LLVMAppendBasicBlockInContext(context, main, "loop");
+  LLVMBasicBlockRef loop_end_block = LLVMAppendBasicBlockInContext(context, main, "loop_end");
+
+  LLVMPositionBuilderAtEnd(ls.builder, entry);
+  /**/
+
 
   LLVMValueRef llvm_printf_int = create_printf_int(ls);
 
