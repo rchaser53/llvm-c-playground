@@ -32,6 +32,17 @@ int main(int argc, char const *argv[])
   LLVMTypeRef lfi_type = LLVMStructTypeInContext(context, struct_param, 1, 0);
   LLVMValueRef struct_vals = { LLVMConstInt(LLVMInt32Type(), 22, 0) };
   LLVMValueRef inst = LLVMConstNamedStruct(lfi_type, &struct_vals, 0);
+  // LLVMSetInitializer(c_t->desc, desc);
+	LLVMTypeRef named = LLVMStructCreateNamed(context, "a");
+  LLVMTypeRef elements[1];
+  elements[0] = LLVMInt32Type();
+  // elements[1] = LLVMInt32Type();
+  LLVMStructSetBody(named, elements, 1, 0);
+  LLVMAddGlobal(mod, named, "b");
+  // LLVMValueRef msg = LLVMBuildBitCast(builder, inst, named, "");
+  // LLVMPointerType(named, 0);
+  // msg[0];
+  // named[0];
 
   LLVMTypeRef closure_param_types[] = { lfi_type, LLVMInt32Type() };
   LLVMTypeRef func_type = LLVMFunctionType(LLVMInt32Type(), closure_param_types, 2, 0);
@@ -44,14 +55,17 @@ int main(int argc, char const *argv[])
   for_gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
   // LLVMValueRef hoehoe = LLVMConstInBoundsGEP(LLVMGetParam(closure, 0), for_gep, 0);
 
-  LLVMValueRef hoehoe = LLVMBuildInBoundsGEP(builder, struct_vals, for_gep, 1, "");
+  // LLVMValueRef hoehoe = LLVMBuildInBoundsGEP(builder, struct_vals, for_gep, 1, "");
   // LLVMValueRef field_info = LLVMBuildLoad(builder, hoehoe, "");
-  // LLVMValueRef inner_hoge = LLVMBuildInBoundsGEP(builder, hoehoe, for_gep, 0, "");
+  LLVMValueRef inner_hoge = LLVMBuildInBoundsGEP(builder, inst, for_gep, 0, "");
   // LLVMValueRef hoehoe = LLVMGetParam(closure, 0);
 
-  LLVMValueRef mesokun = LLVMGetParam(closure, 1);
+  // LLVMValueRef msg = LLVMBuildBitCast(c->builder, LLVMGetParam(c_t->dispatch_fn, 2), msg_type, "");
+  
+  // LLVMValueRef field = LLVMBuildStructGEP(builder, msg, 0, "");
+  // LLVMBuildLoad(builder, msg, "");
 
-  LLVMValueRef closure_ret = LLVMBuildAdd(builder, hoehoe, LLVMConstInt(LLVMInt32Type(), 11, 0), "aa");
+  LLVMValueRef closure_ret = LLVMBuildAdd(builder, LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMGetParam(closure, 1), "aa");
 
   LLVMBuildRet(builder, closure_ret);
   /**/
