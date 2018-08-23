@@ -13,9 +13,12 @@ typedef struct llvmStruct {
 
 LLVMValueRef codegen_string(LLVMModuleRef module, LLVMContextRef context, const char* str);
 LLVMValueRef create_printf_int(LlvmStruct ls);
-LlvmStruct *createLlvm(LLVMModuleRef module, LLVMContextRef context, LLVMBuilderRef builder);
+LLVMValueRef get_field_value(LLVMBuilderRef builder, LLVMValueRef target_struct, int target_index);
+LLVMValueRef set_field_value(LLVMBuilderRef builder, LLVMValueRef target_struct, int target_index, LLVMValueRef value);
 
 LLVMValueRef is_equal_int(LlvmStruct ls, int lhs_val, int rhs_val);
+
+LlvmStruct *createLlvm(LLVMModuleRef module, LLVMContextRef context, LLVMBuilderRef builder);
 
 void emit_file(LLVMModuleRef module, const char * filename);
 void optimization(LLVMModuleRef mod);

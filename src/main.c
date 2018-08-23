@@ -11,8 +11,6 @@
 
 #include "./header/util.h"
 
-// (a) => (b) => a * b;
-
 int main(int argc, char const *argv[])
 {
   /* setup */
@@ -24,9 +22,10 @@ int main(int argc, char const *argv[])
 
   /**/
 	LLVMTypeRef named = LLVMStructCreateNamed(context, "test_struct");
-  LLVMTypeRef elements[1];
+  LLVMTypeRef elements[2];
   elements[0] = LLVMInt32Type();
-  LLVMStructSetBody(named, elements, 1, 0);
+  elements[1] = LLVMInt32Type();
+  LLVMStructSetBody(named, elements, 2, 0);
 
   LLVMTypeRef closure_param_types[] = { LLVMPointerType(named, 0), LLVMInt32Type() };
   LLVMTypeRef func_type = LLVMFunctionType(LLVMInt32Type(), closure_param_types, 2, 0);
@@ -34,13 +33,9 @@ int main(int argc, char const *argv[])
   LLVMBasicBlockRef closure_entry = LLVMAppendBasicBlock(closure, "entry");
   LLVMPositionBuilderAtEnd(builder, closure_entry);
 
-  LLVMValueRef for_gep[2];
-  for_gep[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  for_gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  
-  LLVMValueRef first_param = LLVMGetParam(closure, 0);
-  LLVMValueRef field = LLVMBuildInBoundsGEP(builder, first_param, for_gep, 2, "");
-  field = LLVMBuildLoad(builder, field, "");
+  LLVMValueRef target_struct = LLVMGetParam(closure, 0);
+  set_field_value(builder, target_struct, 0, LLVMConstInt(LLVMInt32Type(), 12, 0));
+  LLVMValueRef field = get_field_value(builder, target_struct, 0);
 
   LLVMValueRef closure_ret = LLVMBuildAdd(builder, field, LLVMGetParam(closure, 1), "");
   LLVMBuildRet(builder, closure_ret);
@@ -124,6 +119,26 @@ void optimization(LLVMModuleRef mod)
   LLVMAddGVNPass(pas_manager);
   LLVMAddCFGSimplificationPass(pas_manager);
   LLVMInitializeFunctionPassManager(pas_manager);
+}
+
+LLVMValueRef get_field_value(LLVMBuilderRef builder, LLVMValueRef target_struct, int target_index)
+{
+  LLVMValueRef range[2];
+  range[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  range[1] = LLVMConstInt(LLVMInt32Type(), target_index, 0);
+
+  LLVMValueRef field = LLVMBuildInBoundsGEP(builder, target_struct, range, 2, "");
+  return LLVMBuildLoad(builder, field, "");
+}
+
+LLVMValueRef set_field_value(LLVMBuilderRef builder, LLVMValueRef target_struct, int target_index, LLVMValueRef value)
+{
+  LLVMValueRef range[2];
+  range[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+  range[1] = LLVMConstInt(LLVMInt32Type(), target_index, 0);
+
+  LLVMValueRef field = LLVMBuildInBoundsGEP(builder, target_struct, range, 2, "");
+  LLVMBuildStore(builder, value, field);
 }
 
   // this remove
