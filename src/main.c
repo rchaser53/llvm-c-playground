@@ -11,11 +11,6 @@
 
 #include "./header/util.h"
 
-// LLVMValueRef is_cmp_llvm_int(LlvmStruct ls, LLVMIntPredicate cmp, int lhs_val, int rhs_val) {
-//   LLVMValueRef LHS = LLVMConstInt(LLVMInt32Type(), lhs_val, 0);
-//   LLVMValueRef RHS = LLVMConstInt(LLVMInt32Type(), rhs_val, 0);
-//   return LLVMBuildICmp(ls.builder, cmp, LHS, RHS, "");
-// }
 // (a) => (b) => a * b;
 
 int main(int argc, char const *argv[])
@@ -28,23 +23,12 @@ int main(int argc, char const *argv[])
   /**/
 
   /**/
-  LLVMTypeRef struct_param[] = { LLVMInt32Type() };
-  LLVMTypeRef lfi_type = LLVMStructTypeInContext(context, struct_param, 1, 0);
-  LLVMValueRef struct_vals = { LLVMConstInt(LLVMInt32Type(), 22, 0) };
-  LLVMValueRef inst = LLVMConstNamedStruct(lfi_type, &struct_vals, 0);
-  // LLVMSetInitializer(c_t->desc, desc);
-	LLVMTypeRef named = LLVMStructCreateNamed(context, "a");
+	LLVMTypeRef named = LLVMStructCreateNamed(context, "test_struct");
   LLVMTypeRef elements[1];
   elements[0] = LLVMInt32Type();
-  // elements[1] = LLVMInt32Type();
   LLVMStructSetBody(named, elements, 1, 0);
-  LLVMAddGlobal(mod, named, "b");
-  // LLVMValueRef msg = LLVMBuildBitCast(builder, inst, named, "");
-  // LLVMPointerType(named, 0);
-  // msg[0];
-  // named[0];
 
-  LLVMTypeRef closure_param_types[] = { lfi_type, LLVMInt32Type() };
+  LLVMTypeRef closure_param_types[] = { LLVMPointerType(named, 0), LLVMInt32Type() };
   LLVMTypeRef func_type = LLVMFunctionType(LLVMInt32Type(), closure_param_types, 2, 0);
   LLVMValueRef closure = LLVMAddFunction(mod, "closure", func_type);
   LLVMBasicBlockRef closure_entry = LLVMAppendBasicBlock(closure, "entry");
@@ -53,24 +37,14 @@ int main(int argc, char const *argv[])
   LLVMValueRef for_gep[2];
   for_gep[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
   for_gep[1] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-  // LLVMValueRef hoehoe = LLVMConstInBoundsGEP(LLVMGetParam(closure, 0), for_gep, 0);
-
-  // LLVMValueRef hoehoe = LLVMBuildInBoundsGEP(builder, struct_vals, for_gep, 1, "");
-  // LLVMValueRef field_info = LLVMBuildLoad(builder, hoehoe, "");
-  LLVMValueRef inner_hoge = LLVMBuildInBoundsGEP(builder, inst, for_gep, 0, "");
-  // LLVMValueRef hoehoe = LLVMGetParam(closure, 0);
-
-  // LLVMValueRef msg = LLVMBuildBitCast(c->builder, LLVMGetParam(c_t->dispatch_fn, 2), msg_type, "");
   
-  // LLVMValueRef field = LLVMBuildStructGEP(builder, msg, 0, "");
-  // LLVMBuildLoad(builder, msg, "");
+  LLVMValueRef first_param = LLVMGetParam(closure, 0);
+  LLVMValueRef field = LLVMBuildInBoundsGEP(builder, first_param, for_gep, 2, "");
+  field = LLVMBuildLoad(builder, field, "");
 
-  LLVMValueRef closure_ret = LLVMBuildAdd(builder, LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMGetParam(closure, 1), "aa");
-
+  LLVMValueRef closure_ret = LLVMBuildAdd(builder, field, LLVMGetParam(closure, 1), "");
   LLVMBuildRet(builder, closure_ret);
   /**/
-
-
 
   /**/
   LLVMTypeRef param_types[] = { LLVMInt32Type() };
@@ -104,6 +78,7 @@ int main(int argc, char const *argv[])
   LLVMBuildCall(builder, llvm_printf_int, printf_args, 2, "");
 
   LLVMValueRef for_cond = LLVMBuildICmp(ls.builder, LLVMIntUGT, lhs, LLVMConstInt(LLVMInt32Type(), 2, 0), "");
+
   LLVMBuildCondBr(builder, for_cond, loop_end_block, loop_block);
   LLVMPositionBuilderAtEnd(builder, loop_end_block);
 
