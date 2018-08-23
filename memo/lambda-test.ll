@@ -16,6 +16,11 @@ entry:
 
 define i32 @main(i32) {
 entry:
+  %test = alloca %test_struct
+  %test_in = getelementptr %test_struct, %test_struct* %test, i32 0, i32 0
+  store i32 22, i32* %test_in
+  %nyan = call i32 @closure(%test_struct* %test, i32 3)
+
   %1 = alloca i32
   store i32 0, i32* %1
   br label %loop
