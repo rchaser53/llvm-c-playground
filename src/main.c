@@ -107,6 +107,8 @@ int main(int argc, char const *argv[])
 
   emit_file(mod, "main.ll");
 
+  // char * ab = LLVMPrintModuleToString(mod);
+
   LLVMDisposeBuilder(builder);
   LLVMDisposeExecutionEngine(engine);
 }
@@ -131,8 +133,7 @@ LLVMValueRef get_field_value(LLVMBuilderRef builder, LLVMValueRef target_struct,
   return LLVMBuildLoad(builder, field, "");
 }
 
-LLVMValueRef set_field_value(LLVMBuilderRef builder, LLVMValueRef target_struct, int target_index, LLVMValueRef value)
-{
+void set_field_value(LLVMBuilderRef builder, LLVMValueRef target_struct, int target_index, LLVMValueRef value) {
   LLVMValueRef range[2];
   range[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
   range[1] = LLVMConstInt(LLVMInt32Type(), target_index, 0);
