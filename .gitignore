@@ -3,3 +3,4 @@
 *.ll
 
 !lambda-test.ll
+settings.json
