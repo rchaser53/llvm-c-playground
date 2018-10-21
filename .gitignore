@@ -3,4 +3,5 @@
 *.ll
 
 !lambda-test.ll
+!minimum_strcmp.ll
 settings.json
